@@ -7,6 +7,7 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_html/src/tree/image_element.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+export 'package:flutter_svg/flutter_svg.dart';
 // TODO re-add MultipleGestureDetector for image taps in this extension
 
 class SvgHtmlExtension extends HtmlExtension {
