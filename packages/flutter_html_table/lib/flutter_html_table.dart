@@ -12,7 +12,36 @@ import 'package:flutter_layout_grid/flutter_layout_grid.dart';
 ///
 /// Currently, nested tables are not supported.
 class TableHtmlExtension extends HtmlExtension {
-  const TableHtmlExtension();
+  const TableHtmlExtension({
+    this.tableStyle,
+    this.cellStyle,
+    this.rowStyle,
+    this.columnStyle,
+    this.sectionStyle,
+    this.tdStyle,
+    this.thStyle,
+  });
+
+  /// Style applied to <table> elements
+  final Style? tableStyle;
+
+  /// Style applied to <td> and <th> cell elements
+  final Style? cellStyle;
+
+  /// Style applied to <tr> row elements
+  final Style? rowStyle;
+
+  /// Style applied to <col> and <colgroup> elements
+  final Style? columnStyle;
+
+  /// Style applied to <tbody>, <thead>, and <tfoot> section elements
+  final Style? sectionStyle;
+
+  /// Style specifically for <td> elements, overrides cellStyle
+  final Style? tdStyle;
+
+  /// Style specifically for <th> elements, overrides cellStyle
+  final Style? thStyle;
 
   @override
   Set<String> get supportedTags => {
@@ -39,22 +68,27 @@ class TableHtmlExtension extends HtmlExtension {
         elementClasses: context.classes.toList(),
         tableStructure: children,
         cellDescendants: cellDescendants,
-        style: Style(display: Display.block),
+        style: tableStyle?.merge(Style(display: Display.block)) ?? Style(display: Display.block),
         node: context.node,
       );
     }
 
     if (context.elementName == "th" || context.elementName == "td") {
+      final defaultStyle = context.elementName == "th"
+          ? Style(
+              fontWeight: FontWeight.bold,
+              textAlign: TextAlign.center,
+              verticalAlign: VerticalAlign.middle,
+            )
+          : Style(
+              verticalAlign: VerticalAlign.middle,
+            );
+
+      final specificStyle = context.elementName == "th" ? thStyle : tdStyle;
+      final mergedStyle = cellStyle?.merge(specificStyle)?.merge(defaultStyle) ?? specificStyle?.merge(defaultStyle) ?? defaultStyle;
+
       return TableCellElement(
-        style: context.elementName == "th"
-            ? Style(
-                fontWeight: FontWeight.bold,
-                textAlign: TextAlign.center,
-                verticalAlign: VerticalAlign.middle,
-              )
-            : Style(
-                verticalAlign: VerticalAlign.middle,
-              ),
+        style: mergedStyle,
         children: children,
         node: context.node,
         name: context.elementName,
@@ -71,7 +105,7 @@ class TableHtmlExtension extends HtmlExtension {
         elementId: context.id,
         elementClasses: context.classes.toList(),
         children: children,
-        style: Style(),
+        style: sectionStyle ?? Style(),
         node: context.node,
       );
     }
@@ -82,7 +116,7 @@ class TableHtmlExtension extends HtmlExtension {
         elementId: context.id,
         elementClasses: context.classes.toList(),
         children: children,
-        style: Style(),
+        style: rowStyle ?? Style(),
         node: context.node,
       );
     }
@@ -93,7 +127,7 @@ class TableHtmlExtension extends HtmlExtension {
         elementId: context.id,
         elementClasses: context.classes.toList(),
         children: children,
-        style: Style(),
+        style: columnStyle ?? Style(),
         node: context.node,
       );
     }
